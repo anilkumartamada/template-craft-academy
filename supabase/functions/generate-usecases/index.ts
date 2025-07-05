@@ -21,15 +21,15 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4',
+        model: 'gpt-4o-mini',
         messages: [
           {
             role: 'system',
-            content: `You are an AI assistant helping to generate specific use cases for prompt templates. Generate exactly 4 practical, actionable use cases based on the department and task provided. Each use case should be detailed and specific to help users understand how they might apply AI prompts in that context.`
+            content: `You are an AI assistant helping to generate specific use cases for prompt templates. Generate exactly 4 practical, actionable use cases based on the department and task provided. Format your response as a numbered list with each use case on a separate line, starting with "1.", "2.", "3.", and "4.". Each use case should be detailed and specific to help users understand how they might apply AI prompts in that context.`
           },
           {
             role: 'user',
-            content: `Department: ${department}\nTask: ${task}\n\nGenerate exactly 4 specific use cases for prompt templates that would be useful for this department and task. Make each use case practical and actionable.`
+            content: `Department: ${department}\nTask: ${task}\n\nGenerate exactly 4 specific use cases for prompt templates that would be useful for this department and task. Make each use case practical and actionable. Format as a numbered list.`
           }
         ],
         max_tokens: 800,
@@ -47,10 +47,29 @@ serve(async (req) => {
     
     // Parse the response to extract individual use cases
     const useCases = content
-      .split(/\d+\.|\n-|\n\*/)
+      .split(/(?:^|\n)\s*\d+\.\s*/)
       .map((useCase: string) => useCase.trim())
-      .filter((useCase: string) => useCase.length > 20)
+      .filter((useCase: string) => useCase.length > 10)
       .slice(0, 4) // Ensure exactly 4 use cases
+
+    // If we don't get 4 use cases, try alternative parsing
+    if (useCases.length < 4) {
+      const alternativeUseCases = content
+        .split(/\n/)
+        .map((line: string) => line.replace(/^\d+\.\s*/, '').trim())
+        .filter((line: string) => line.length > 10)
+        .slice(0, 4)
+      
+      if (alternativeUseCases.length >= useCases.length) {
+        return new Response(
+          JSON.stringify({ usecases: alternativeUseCases }),
+          {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 200,
+          },
+        )
+      }
+    }
 
     return new Response(
       JSON.stringify({ usecases: useCases }),
