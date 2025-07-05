@@ -25,11 +25,11 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: `You are an AI assistant helping to generate specific use cases for prompt templates. Generate exactly 4 practical, actionable use cases based on the department and task provided. Format your response as a numbered list with each use case on a separate line, starting with "1.", "2.", "3.", and "4.". Each use case should be detailed and specific to help users understand how they might apply AI prompts in that context.`
+            content: `You are an AI assistant helping to generate specific use cases based on department and task. Generate exactly 4 practical, actionable use cases based on the department and task provided. Format your response as a numbered list with each use case on a separate line, starting with "1.", "2.", "3.", and "4.". Each use case should be detailed and specific.`
           },
           {
             role: 'user',
-            content: `Department: ${department}\nTask: ${task}\n\nGenerate exactly 4 specific use cases for prompt templates that would be useful for this department and task. Make each use case practical and actionable. Format as a numbered list.`
+            content: `Department: ${department}\nTask: ${task}\n\nGenerate exactly 4 specific use cases that would be useful for this department and task. Make each use case practical and actionable. Format as a numbered list.`
           }
         ],
         max_tokens: 800,
