@@ -9,16 +9,115 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          created_at: string | null
+          email: string
+          id: string
+          name: string
+          role: Database["public"]["Enums"]["app_role"] | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          id: string
+          name: string
+          role?: Database["public"]["Enums"]["app_role"] | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          id?: string
+          name?: string
+          role?: Database["public"]["Enums"]["app_role"] | null
+        }
+        Relationships: []
+      }
+      prompt_submissions: {
+        Row: {
+          created_at: string | null
+          evaluation: Json
+          id: string
+          prompt_template: string
+          score: number
+          usecase: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          evaluation: Json
+          id?: string
+          prompt_template: string
+          score: number
+          usecase: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          evaluation?: Json
+          id?: string
+          prompt_template?: string
+          score?: number
+          usecase?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prompt_submissions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      usecases: {
+        Row: {
+          created_at: string | null
+          department: string
+          generated_usecases: Json
+          id: string
+          task: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          department: string
+          generated_usecases: Json
+          id?: string
+          task: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          department?: string
+          generated_usecases?: Json
+          id?: string
+          task?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usecases_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_role: {
+        Args: { user_id: string }
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "user" | "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -133,6 +232,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["user", "admin"],
+    },
   },
 } as const
