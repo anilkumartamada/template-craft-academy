@@ -14,6 +14,34 @@ serve(async (req) => {
   try {
     const { usecase, prompt } = await req.json()
 
+    // Check for placeholders in the prompt
+    const hasPlaceholders = /[\[\]<>{}]|{{.*?}}|\{.*?\}/.test(prompt) || 
+                           prompt.includes('[') || 
+                           prompt.includes(']') || 
+                           prompt.includes('<') || 
+                           prompt.includes('>') || 
+                           prompt.includes('{') || 
+                           prompt.includes('}')
+
+    // If no placeholders are found, return specific feedback
+    if (!hasPlaceholders) {
+      const placeholderEvaluation = {
+        matches_usecase: false,
+        positive_points: [],
+        lacking: ["Placeholders are necessary"],
+        suggestions: [],
+        score: 2
+      }
+
+      return new Response(
+        JSON.stringify(placeholderEvaluation),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200,
+        },
+      )
+    }
+
     const openAIResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -21,7 +49,7 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4',
+        model: 'gpt-4.1-2025-04-14',
         messages: [
           {
             role: 'system',
