@@ -46,28 +46,24 @@ export function TemplateEvaluator() {
     setIsEvaluating(true);
 
     try {
-      // Call OpenAI to evaluate the prompt
-      const response = await fetch('/api/evaluate-prompt', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      // Call Supabase Edge Function to evaluate the prompt
+      const { data, error } = await supabase.functions.invoke('evaluate-prompt', {
+        body: {
           usecase: useCase,
           prompt: promptTemplate,
-        }),
+        },
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to evaluate prompt');
+      if (error) {
+        throw new Error(error.message || 'Failed to evaluate prompt');
       }
 
-      const evaluationData = await response.json();
+      const evaluationData = data;
       setEvaluation(evaluationData);
 
       // Save to database
       if (user) {
-        const { data, error } = await supabase
+        const { data: submissionData, error: dbError } = await supabase
           .from('prompt_submissions')
           .insert({
             user_id: user.id,
@@ -79,11 +75,11 @@ export function TemplateEvaluator() {
           .select()
           .single();
 
-        if (error) {
-          console.error('Error saving submission:', error);
+        if (dbError) {
+          console.error('Error saving submission:', dbError);
         } else {
           // Update submissions list - fix the TypeScript error
-          setSubmissions([data, ...submissions]);
+          setSubmissions([submissionData, ...submissions]);
         }
       }
 

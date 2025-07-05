@@ -38,30 +38,25 @@ export function UseCaseGenerator() {
     setIsGenerating(true);
 
     try {
-      // Call OpenAI to generate use cases
-      const response = await fetch('/api/generate-usecases', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      // Call Supabase Edge Function to generate use cases
+      const { data, error } = await supabase.functions.invoke('generate-usecases', {
+        body: {
           department,
           task,
-        }),
+        },
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to generate use cases');
+      if (error) {
+        throw new Error(error.message || 'Failed to generate use cases');
       }
 
-      const data = await response.json();
       const useCases = data.usecases || [];
       
       setGeneratedUseCases(useCases);
 
       // Save to database
       if (user) {
-        const { error } = await supabase
+        const { error: dbError } = await supabase
           .from('usecases')
           .insert({
             user_id: user.id,
@@ -70,8 +65,8 @@ export function UseCaseGenerator() {
             generated_usecases: useCases,
           });
 
-        if (error) {
-          console.error('Error saving use cases:', error);
+        if (dbError) {
+          console.error('Error saving use cases:', dbError);
         }
       }
 
