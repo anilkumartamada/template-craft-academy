@@ -27,6 +27,7 @@ export function TemplateEvaluator() {
     setEvaluation,
     isEvaluating,
     setIsEvaluating,
+    submissions,
     setSubmissions,
   } = useAppData();
 
@@ -81,8 +82,8 @@ export function TemplateEvaluator() {
         if (error) {
           console.error('Error saving submission:', error);
         } else {
-          // Update submissions list
-          setSubmissions(prev => [data, ...prev]);
+          // Update submissions list - fix the TypeScript error
+          setSubmissions([data, ...submissions]);
         }
       }
 
