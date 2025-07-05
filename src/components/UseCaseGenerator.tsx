@@ -172,7 +172,7 @@ export function UseCaseGenerator() {
                       <div className="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-medium">
                         {index + 1}
                       </div>
-                      <p className="text-gray-800 leading-relaxed">{useCase}</p>
+                      <p className="text-gray-800 leading-relaxed">{useCase.replace(/\*\*/g, '')}</p>
                     </div>
                   </div>
                 ))}
