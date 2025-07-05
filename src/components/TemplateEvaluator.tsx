@@ -225,46 +225,51 @@ export function TemplateEvaluator() {
                   </p>
                 </div>
 
-                {/* Positive Points */}
-                {evaluation.positive_points && (
-                  <div className="p-4 bg-green-50 rounded-xl border border-green-200">
-                    <h3 className="font-semibold text-green-800 mb-2">Positive Points</h3>
-                    <ul className="space-y-1">
-                      {evaluation.positive_points.map((point: string, index: number) => (
-                        <li key={index} className="text-green-700 text-sm">
-                          • {point}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+                {/* Only show feedback sections if prompt matches use case */}
+                {evaluation.matches_usecase && (
+                  <>
+                    {/* Positive Points */}
+                    {evaluation.positive_points && evaluation.positive_points.length > 0 && (
+                      <div className="p-4 bg-green-50 rounded-xl border border-green-200">
+                        <h3 className="font-semibold text-green-800 mb-2">Positive Points</h3>
+                        <ul className="space-y-1">
+                          {evaluation.positive_points.map((point: string, index: number) => (
+                            <li key={index} className="text-green-700 text-sm">
+                              • {point}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
 
-                {/* Areas for Improvement */}
-                {evaluation.lacking && (
-                  <div className="p-4 bg-orange-50 rounded-xl border border-orange-200">
-                    <h3 className="font-semibold text-orange-800 mb-2">Areas for Improvement</h3>
-                    <ul className="space-y-1">
-                      {evaluation.lacking.map((point: string, index: number) => (
-                        <li key={index} className="text-orange-700 text-sm">
-                          • {point}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+                    {/* Areas for Improvement */}
+                    {evaluation.lacking && evaluation.lacking.length > 0 && (
+                      <div className="p-4 bg-orange-50 rounded-xl border border-orange-200">
+                        <h3 className="font-semibold text-orange-800 mb-2">Areas for Improvement</h3>
+                        <ul className="space-y-1">
+                          {evaluation.lacking.map((point: string, index: number) => (
+                            <li key={index} className="text-orange-700 text-sm">
+                              • {point}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
 
-                {/* Suggestions */}
-                {evaluation.suggestions && (
-                  <div className="p-4 bg-blue-50 rounded-xl border border-blue-200">
-                    <h3 className="font-semibold text-blue-800 mb-2">Suggestions</h3>
-                    <ul className="space-y-1">
-                      {evaluation.suggestions.map((suggestion: string, index: number) => (
-                        <li key={index} className="text-blue-700 text-sm">
-                          • {suggestion}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+                    {/* Suggestions */}
+                    {evaluation.suggestions && evaluation.suggestions.length > 0 && (
+                      <div className="p-4 bg-blue-50 rounded-xl border border-blue-200">
+                        <h3 className="font-semibold text-blue-800 mb-2">Suggestions</h3>
+                        <ul className="space-y-1">
+                          {evaluation.suggestions.map((suggestion: string, index: number) => (
+                            <li key={index} className="text-blue-700 text-sm">
+                              • {suggestion}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             ) : (
