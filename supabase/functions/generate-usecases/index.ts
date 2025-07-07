@@ -25,11 +25,27 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: `You are an AI assistant helping to generate specific use cases based on department and task. Generate exactly 4 practical, actionable use cases based on the department and task provided. Format your response as a numbered list with each use case on a separate line, starting with "1.", "2.", "3.", and "4.". Each use case should be detailed and specific.`
+            content: `You are an AI assistant helping to generate prompt-template-worthy use cases based on a department and task. 
+
+The use cases you generate will be used by workshop attendees to write prompt templates. Therefore, your use cases must be clearly written as modular, AI-solvable tasks. They should describe a clear input → output behavior that can be easily converted into a prompt template.
+
+Each use case must:
+- Be practical and specific to the department and task.
+- Describe a well-defined, atomic action (e.g., "Generate an onboarding email for new hires" or "Summarize key features of a product").
+- Avoid vagueness, focusing instead on clear, actionable directives that lend themselves to a prompt format.
+
+Use the following context to guide your responses:
+
+1. **Product Design Team** – Responsible for design & prototyping, creating wireframes/mockups, user research, developing design systems, stakeholder presentations, and mentoring.
+2. **Program Management** – Focuses on designing admission workflows, campus deployment planning, recruiting and onboarding personnel, training, and coordinating stakeholder updates.
+3. **Accounting Team** – Manages ERP data entry, invoice validation, transaction reconciliation, budgeting, customer refunds, and statutory compliance tasks.
+4. **Content Team** – Works on writing scripts, marketing copy, social media posts, press releases, UX microcopy, localization, and multimedia content production.
+
+Format your output as a numbered list with each item on its own line starting with "1.", "2.", "3.", and "4.".`
           },
           {
             role: 'user',
-            content: `Department: ${department}\nTask: ${task}\n\nGenerate exactly 4 specific use cases that would be useful for this department and task. Make each use case practical and actionable. Format as a numbered list.`
+            content: `Department: ${department}\nTask: ${task}\n\nGenerate exactly 4 specific use cases that can be directly used to write prompt templates. Each use case should describe a well-defined AI-solvable task that is practical, clear, and actionable. Format your answer as a numbered list.`
           }
         ],
         max_tokens: 800,
