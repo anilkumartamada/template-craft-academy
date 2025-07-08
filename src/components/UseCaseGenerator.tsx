@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Lightbulb, Loader2 } from 'lucide-react';
@@ -25,8 +26,38 @@ export function UseCaseGenerator() {
     setIsGenerating,
   } = useAppData();
 
+  const [customDepartment, setCustomDepartment] = React.useState('');
+  const [showCustomInput, setShowCustomInput] = React.useState(false);
+
+  const departmentOptions = [
+    'Product Design',
+    'Program Management', 
+    'Accounting',
+    'Content Team',
+    'Enter your department'
+  ];
+
+  const handleDepartmentChange = (value: string) => {
+    if (value === 'Enter your department') {
+      setShowCustomInput(true);
+      setDepartment('');
+    } else {
+      setShowCustomInput(false);
+      setDepartment(value);
+      setCustomDepartment('');
+    }
+  };
+
+  const handleCustomDepartmentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setCustomDepartment(value);
+    setDepartment(value);
+  };
+
   const handleGenerate = async () => {
-    if (!department.trim() || !task.trim()) {
+    const finalDepartment = showCustomInput ? customDepartment : department;
+    
+    if (!finalDepartment.trim() || !task.trim()) {
       toast({
         title: "Missing Information",
         description: "Please fill in both department and task fields.",
@@ -41,7 +72,7 @@ export function UseCaseGenerator() {
       // Call Supabase Edge Function to generate use cases
       const { data, error } = await supabase.functions.invoke('generate-usecases', {
         body: {
-          department,
+          department: finalDepartment,
           task,
         },
       });
@@ -60,7 +91,7 @@ export function UseCaseGenerator() {
           .from('usecases')
           .insert({
             user_id: user.id,
-            department,
+            department: finalDepartment,
             task,
             generated_usecases: useCases,
           });
@@ -111,13 +142,27 @@ export function UseCaseGenerator() {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="department">Department</Label>
-              <Input
-                id="department"
-                placeholder="e.g., Marketing, Sales, HR, Engineering"
-                value={department}
-                onChange={(e) => setDepartment(e.target.value)}
-                className="rounded-xl"
-              />
+              <Select onValueChange={handleDepartmentChange}>
+                <SelectTrigger className="rounded-xl">
+                  <SelectValue placeholder="Select your department" />
+                </SelectTrigger>
+                <SelectContent>
+                  {departmentOptions.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {option}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
+              {showCustomInput && (
+                <Input
+                  placeholder="Enter your department"
+                  value={customDepartment}
+                  onChange={handleCustomDepartmentChange}
+                  className="rounded-xl mt-2"
+                />
+              )}
             </div>
 
             <div className="space-y-2">
@@ -134,7 +179,7 @@ export function UseCaseGenerator() {
 
             <Button
               onClick={handleGenerate}
-              disabled={isGenerating || !department.trim() || !task.trim()}
+              disabled={isGenerating || (!showCustomInput && !department.trim()) || (showCustomInput && !customDepartment.trim()) || !task.trim()}
               className="w-full rounded-xl bg-blue-600 hover:bg-blue-700"
             >
               {isGenerating ? (
