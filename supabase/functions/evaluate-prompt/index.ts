@@ -53,7 +53,11 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: `You are an expert prompt engineering evaluator. Analyze the given prompt template against the specified use case and provide structured feedback. Return your response as a JSON object with the following structure:
+            content: `You are an expert prompt engineering evaluator. Analyze the given prompt template against the specified use case and provide structured feedback. 
+
+IMPORTANT: Be lenient with use case matching. Even if the prompt template and use case are only slightly similar or related, consider it as a match (matches_usecase: true). Only mark as no match if they are completely unrelated or contradictory.
+
+Return your response as a JSON object with the following structure:
 {
   "matches_usecase": boolean,
   "positive_points": ["point1", "point2", ...],
@@ -63,15 +67,17 @@ serve(async (req) => {
 }
 
 Evaluate based on:
-1. Relevance to the use case
+1. Relevance to the use case (be generous with matching)
 2. Clarity and specificity
 3. Completeness of instructions
 4. Potential effectiveness
-5. Professional structure`
+5. Professional structure
+
+Provide full evaluation results with positive points, areas for improvement, AND suggestions even when the match is not perfect, as long as there's some relation between the use case and prompt.`
           },
           {
             role: 'user',
-            content: `Use Case: ${usecase}\n\nPrompt Template: ${prompt}\n\nPlease evaluate this prompt template against the use case and provide detailed feedback in the specified JSON format.`
+            content: `Use Case: ${usecase}\n\nPrompt Template: ${prompt}\n\nPlease evaluate this prompt template against the use case and provide detailed feedback in the specified JSON format. Be lenient with matching - if there's any reasonable connection, consider it a match.`
           }
         ],
         max_tokens: 1000,
@@ -91,9 +97,9 @@ Evaluate based on:
       // Try to parse the JSON response
       const evaluation = JSON.parse(content)
       
-      // Ensure all required fields are present
+      // Ensure all required fields are present and apply lenient matching
       const structuredEvaluation = {
-        matches_usecase: evaluation.matches_usecase || false,
+        matches_usecase: evaluation.matches_usecase !== false, // Default to true unless explicitly false
         positive_points: Array.isArray(evaluation.positive_points) ? evaluation.positive_points : [],
         lacking: Array.isArray(evaluation.lacking) ? evaluation.lacking : [],
         suggestions: Array.isArray(evaluation.suggestions) ? evaluation.suggestions : [],
@@ -108,15 +114,15 @@ Evaluate based on:
         },
       )
     } catch (parseError) {
-      // If parsing fails, create a fallback response
+      // If parsing fails, create a fallback response with lenient matching
       console.error('Failed to parse OpenAI response:', parseError)
       
       const fallbackEvaluation = {
-        matches_usecase: false,
-        positive_points: ["Received response from AI"],
+        matches_usecase: true, // Default to true for lenient matching
+        positive_points: ["Received response from AI", "Contains prompt structure"],
         lacking: ["Unable to parse detailed evaluation"],
         suggestions: ["Please try again with a clearer prompt template"],
-        score: 3
+        score: 5
       }
 
       return new Response(
@@ -133,7 +139,7 @@ Evaluate based on:
       JSON.stringify({ error: error.message }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500,
+      status: 500,
       },
     )
   }
